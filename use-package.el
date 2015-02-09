@@ -114,10 +114,10 @@ Return nil when the queue is empty."
          (forms           (gethash priority use-package-idle-forms))
          (first-form      (car forms))
          (forms-remaining (cdr forms)))
-      (if forms-remaining
-          (puthash priority forms-remaining use-package-idle-forms)
-        (remhash priority use-package-idle-forms))
-      first-form))
+    (if forms-remaining
+        (puthash priority forms-remaining use-package-idle-forms)
+      (remhash priority use-package-idle-forms))
+    first-form))
 
 (defun use-package-idle-eval()
   "Start to eval idle-commands from the idle queue."
@@ -146,26 +146,26 @@ Return nil when the queue is empty."
 
 (defvar use-package-keywords
   '(
-     :bind
-     :commands
-     :config
-     :defer
-     :defines
-     :demand
-     :diminish
-     :disabled
-     :ensure
-     :idle
-     :idle-priority
-     :if
-     :init
-     :interpreter
-     :load-path
-     :mode
-     :pre-init
-     :pre-load
-     :requires
-  )
+    :bind
+    :commands
+    :config
+    :defer
+    :defines
+    :demand
+    :diminish
+    :disabled
+    :ensure
+    :idle
+    :idle-priority
+    :if
+    :init
+    :interpreter
+    :load-path
+    :mode
+    :pre-init
+    :pre-load
+    :requires
+    )
   "Keywords recognized by `use-package'.")
 
 (defun use-package-mplist-get (plist prop)
@@ -223,11 +223,11 @@ are all non-keywords elements that follow it."
   "Error if any keyword given in ARGS is not recognized.
 Return the list of recognized keywords."
   (mapc
-    (function
-      (lambda (keyword)
-        (unless (memq keyword use-package-keywords)
-          (error "Unrecognized keyword: %s" keyword))))
-    (use-package-mplist-keys args)))
+   (function
+    (lambda (keyword)
+      (unless (memq keyword use-package-keywords)
+        (error "Unrecognized keyword: %s" keyword))))
+   (use-package-mplist-keys args)))
 
 (defun use-package-plist-get-value (plist prop)
   "Return the value of PROP in PLIST as if it was backquoted."
