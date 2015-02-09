@@ -152,6 +152,20 @@ spelled-out keystrokes, e.g., \"C-c C-z\". See documentation of
 (defmacro unbind-key (key-name &optional keymap)
   `(bind-key ,key-name nil ,keymap))
 
+(defun bind-chord (chord command &optional keymap)
+  (unless (fboundp 'key-chord-mode)
+    (error "Cannot bind chords without `key-chord-mode'."))
+  (let ((key1 (logand 255 (aref chord 0)))
+        (key2 (logand 255 (aref chord 1))))
+    (if (eq key1 key2)
+        (bind-key (vector 'key-chord key1 key2) command keymap)
+      ;; else
+      (bind-key (vector 'key-chord key1 key2) command keymap)
+      (bind-key (vector 'key-chord key2 key1) command keymap))))
+
+(defun unbind-chord (chord &optional keymap)
+  (bind-chord chord nil keymap))
+
 (defmacro bind-key* (key-name command)
   `(progn
      (bind-key ,key-name ,command)
