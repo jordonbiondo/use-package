@@ -1,11 +1,11 @@
-;;; use-package.el --- A use-package declaration for simplifying your .emacs
+;;; jorbi-use-package.el --- A use-package declaration for simplifying your .emacs
 
 ;; Copyright (C) 2012 John Wiegley
 
 ;; Author: John Wiegley <jwiegley@gmail.com>
 ;; Created: 17 Jun 2012
 ;; Version: 1.0
-;; Package-Requires: ((bind-key "1.0") (diminish "0.44"))
+;; Package-Requires: ((jorbi-bind-key "1.0") (diminish "0.44"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/jwiegley/use-package
 
@@ -37,7 +37,7 @@
 
 ;;; Code:
 
-(require 'bind-key)
+(require 'jorbi-bind-key)
 (require 'bytecomp)
 (require 'diminish nil t)
 
@@ -147,6 +147,7 @@ Return nil when the queue is empty."
 (defvar use-package-keywords
   '(
     :bind
+    :chords
     :commands
     :config
     :defer
@@ -244,6 +245,7 @@ For full documentation. please see commentary.
 :init Code to run when `use-package' form evals.
 :bind Perform key bindings, and define autoload for bound
       commands.
+:chords Like :bind, but expects two character strings for key chords.
 :commands Define autoloads for given commands.
 :pre-load Code to run when `use-package' form evals and before
        anything else. Unlike :init this form runs before the
@@ -276,6 +278,7 @@ For full documentation. please see commentary.
          (idle-body (use-package-plist-get args :idle))
          (idle-priority (use-package-plist-get args :idle-priority))
          (keybindings-alist (use-package-plist-get-value args :bind))
+         (chords-alist (use-package-plist-get-value args :chords))
          (mode (use-package-plist-get-value args :mode))
          (mode-alist
           (if (stringp mode) (cons mode name) mode))
@@ -342,7 +345,7 @@ For full documentation. please see commentary.
           (setq idle-priority 5))
         (setq init-body
               `(progn
-                 (require 'use-package)
+                 (require 'jorbi-use-package)
                  (use-package-init-on-idle (lambda () ,idle-body) ,idle-priority)
                  ,init-body)))
 
@@ -361,12 +364,18 @@ For full documentation. please see commentary.
                                             (push (cdr elem) commands)
                                             (funcall func elem))
                                         cons-list))))))))
-
+        
         (funcall init-for-commands
                  #'(lambda (binding)
                      `(bind-key ,(car binding)
                                 (quote ,(cdr binding))))
                  keybindings-alist)
+
+        (funcall init-for-commands
+                 #'(lambda (chord)
+                     `(bind-chord ,(car chord)
+                                (quote ,(cdr chord))))
+                 chords-alist)
 
         (funcall init-for-commands
                  #'(lambda (mode)
@@ -444,8 +453,8 @@ For full documentation. please see commentary.
 
 (font-lock-add-keywords 'emacs-lisp-mode use-package-font-lock-keywords)
 
-(provide 'use-package)
+(provide 'jorbi-use-package)
 ;; Local Variables:
 ;; indent-tabs-mode: nil
 ;; End:
-;;; use-package.el ends here
+;;; jorbi-use-package.el ends here

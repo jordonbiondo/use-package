@@ -5,6 +5,7 @@
 ;; Author: John Wiegley <jwiegley@gmail.com>
 ;; Created: 16 Jun 2012
 ;; Version: 1.0
+;; Package-Requires: ((key-chord "0.5"))
 ;; Keywords: keys keybinding config dotemacs
 ;; URL: https://github.com/jwiegley/use-package
 
@@ -83,6 +84,7 @@
 ;; your binding it with `bind-key', and what it was rebound it to.
 
 (require 'easy-mmode)
+(require 'jorbi-key-chord)
 
 (defgroup bind-key nil
   "A simple way to manage personal keybindings"
@@ -153,15 +155,21 @@ spelled-out keystrokes, e.g., \"C-c C-z\". See documentation of
   `(bind-key ,key-name nil ,keymap))
 
 (defun bind-chord (chord command &optional keymap)
-  (unless (fboundp 'key-chord-mode)
-    (error "Cannot bind chords without `key-chord-mode'."))
   (let ((key1 (logand 255 (aref chord 0)))
         (key2 (logand 255 (aref chord 1))))
     (if (eq key1 key2)
         (bind-key (vector 'key-chord key1 key2) command keymap)
-      ;; else
       (bind-key (vector 'key-chord key1 key2) command keymap)
       (bind-key (vector 'key-chord key2 key1) command keymap))))
+
+(defun bind-chords (&rest args)
+  (let ((map (plist-get args :map))
+        (key-bindings (progn
+                        (while (keywordp (car args)) (pop args) (pop args))
+                        args)))
+    (dolist (binding key-bindings)
+      (bind-chord (car binding) (cdr binding) map))))
+      
 
 (defun unbind-chord (chord &optional keymap)
   (bind-chord chord nil keymap))
@@ -183,6 +191,7 @@ Accepts keyword arguments:
 
 The rest of the arguments are conses of keybinding string and a
 function symbol (unquoted)."
+  (declare (indent defun))
   (let ((map (plist-get args :map))
         (doc (plist-get args :prefix-docstring))
         (prefix-map (plist-get args :prefix-map))
@@ -315,7 +324,7 @@ function symbol (unquoted)."
 
         (setq last-binding binding)))))
 
-(provide 'bind-key)
+(provide 'jorbi-bind-key)
 ;; Local Variables:
 ;; indent-tabs-mode: nil
 ;; End:
